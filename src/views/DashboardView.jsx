@@ -45,21 +45,23 @@ export default function DashboardView() {
   }
 
   function getPointOnCircle(angle) {
-    const radiantAngle = ((angle - 90) * Math.PI) / 180;
+    // const radiantAngle = ((angle - 90) * Math.PI) / 180;
 
-    const x = diameter / 2 + (diameter / 2) * Math.cos(radiantAngle);
-    const y = diameter / 2 + (diameter / 2) * Math.sin(radiantAngle);
+    const x = diameter / 2 + (diameter / 2) * Math.cos(angle);
+    const y = diameter / 2 + (diameter / 2) * Math.sin(angle);
 
     return [x, y];
   }
 
+  //angle for calculation uses radians as javascript Math implementation uses radians
   function getCircularPaths() {
     const paths = [];
-    let previousAngle = 0;
+    let previousAngle = -0.5 * Math.PI; //Start at the top of the circle
     let index = 0;
     for (const coin of market) {
-      const currentAngle =
-        previousAngle + ((coin.market_cap * 1.0) / totalMarketCap) * 360;
+      const percentage = (coin.market_cap * 1.0) / totalMarketCap;
+      const currentAngle = previousAngle + percentage * (2 * Math.PI); // 2PI radians = 360°
+
       const [startX, startY] = getPointOnCircle(previousAngle);
       const [endX, endY] = getPointOnCircle(currentAngle);
       const color = palette[index];
@@ -70,7 +72,7 @@ export default function DashboardView() {
           d={`M${diameter / 2},${diameter / 2} L${startX},${startY} A${
             diameter / 2
           },${diameter / 2} 0,${
-            Math.abs(currentAngle - previousAngle) > 180 ? 1 : 0
+            Math.abs(currentAngle - previousAngle) > Math.PI ? 1 : 0
           },1 ${endX},${endY}`}
           onMouseEnter={() => setHighlighted(coin.name)}
           onMouseLeave={() => setHighlighted("")}
